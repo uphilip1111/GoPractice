@@ -20,8 +20,17 @@ func main() {
 	//fmt.Printf("hello,Go World\n")
 	http.HandleFunc("/", hello)
 	http.ListenAndServe(":8000", nil)
+}*/
+
+func sumAll(arg ...int) (sum int) {
+	for _, n := range arg {
+		sum += n
+	}
+	return
 }
-*/
+
 func main() {
 	fmt.Printf(stringutil.Reverse("!oG,olleH"))
+	fmt.Printf(" \n")
+	fmt.Println(sumAll(1, 2, 7, 4))
 }
