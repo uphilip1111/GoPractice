@@ -3,10 +3,27 @@ package main
 import (
 	"net/http"
 
+	"database/sql"
+
 	"github.com/gin-gonic/gin"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 var DB = make(map[string]string)
+
+func init() {
+	db, err := sql.Open("mysql", "root:admin@/project")
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+
+	stmIns, err := db.Prepare("insert into project.user_account values(?,?,?,?,?,?)")
+	_, err = stmIns.Exec(1, "acc", "pwd", "name", "0800-000-000", "AuroraTech")
+
+	defer stmIns.Close()
+
+}
 
 func main() {
 	// Disable Console Color
