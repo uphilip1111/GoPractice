@@ -11,21 +11,13 @@ import (
 
 var DB = make(map[string]string)
 
-func init() {
+func main() {
 	db, err := sql.Open("mysql", "root:admin@/project")
 	if err != nil {
 		panic(err.Error())
 	}
 	defer db.Close()
 
-	stmIns, err := db.Prepare("insert into project.user_account values(?,?,?,?,?,?)")
-	_, err = stmIns.Exec(1, "acc", "pwd", "name", "0800-000-000", "AuroraTech")
-
-	defer stmIns.Close()
-
-}
-
-func main() {
 	// Disable Console Color
 	// gin.DisableConsoleColor()
 	r := gin.Default()
@@ -51,27 +43,70 @@ func main() {
 
 	v1 := r.Group("/v1")
 
-	v1.GET("api/login", func(c *gin.Context) {
-		c.String(http.StatusOK, "login successful")
-	})
-	v1.GET("api/logout", func(c *gin.Context) {
-		c.String(http.StatusOK, "logout successful!")
-	})
-	v1.GET("api/register", func(c *gin.Context) {
-		c.String(http.StatusOK, "register OK")
-	})
-	v1.POST("api/post", func(c *gin.Context) {
-		acc := c.PostForm("acc")
-		pwd := c.PostForm("pwd")
-		msg := acc + pwd
-		/*c.JSON(http.StatusOK, gin.H{
+	v1.GET("api/account/logout", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
 			"status": gin.H{
 				"status_code": http.StatusOK,
-				"status":      "ok",
+				"status":      "successful!",
 			},
-			"message": msg,
-		})*/
-		c.String(http.StatusOK, msg)
+			"message": "Logout Successful!",
+		})
+
+	})
+
+	v1.GET("api/account/login", func(c *gin.Context) {
+		acc := c.DefaultQuery("acc", "acc")
+		pwd := c.DefaultQuery("pwd", "pwd")
+
+		var addre string
+		var name string
+		var phone string
+
+		stmOut, err := db.Prepare("select user_name,phone,address from user_account where user_acc = ? and user_pwd = ?")
+		err = stmOut.QueryRow(acc, pwd).Scan(&name, &phone, &addre)
+
+		if err != nil {
+
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"status": gin.H{
+				"status_code": http.StatusOK,
+				"status":      "successful!",
+			},
+			"message": "Login Successful!",
+			"name":    name,
+			"phone":   phone,
+			"address": addre,
+		})
+
+	})
+
+	v1.POST("api/account/register", func(c *gin.Context) {
+		id := c.PostForm("id")
+		acc := c.PostForm("acc")
+		pwd := c.PostForm("pwd")
+		name := c.PostForm("name")
+		phone := c.PostForm("phone")
+		addr := c.PostForm("addr")
+
+		stmIns, err := db.Prepare("insert into user_account values(?,?,?,?,?,?)")
+		_, err = stmIns.Exec(id, acc, pwd, name, phone, addr)
+
+		if err != nil {
+			panic(err.Error())
+		}
+
+		defer stmIns.Close()
+
+		c.JSON(http.StatusOK, gin.H{
+			"status": gin.H{
+				"status_code": http.StatusOK,
+				"status":      "successful!",
+			},
+			"message": "Register Successful!",
+		})
+
 	})
 
 	// Get user value
